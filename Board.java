@@ -19,17 +19,22 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
+
 
 public class Board {
 	private Cell[][] cells;
 	private JFrame frame;
 	private JPanel easyPanel;
+	private JPanel game;
+	private JPanel menubar;
 	private int side ;
 	private int numMines;
 	private JPanel menu;
 	private int numOfFlags;
 	private int nonMines;
+	private JButton menubutton = new JButton("Menu");
+	private JButton reset = new JButton("Reset");
+	private int timer1 = 0;
 
 
 	Board(){
@@ -49,7 +54,6 @@ public class Board {
 		JButton normal = new JButton("Normal");
 		JButton hard = new JButton("Hard");
 		JButton score = new JButton("High Scores");
-		time = new Timer();
 
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -72,10 +76,6 @@ public class Board {
 		gbc.gridx = 0;
 		gbc.gridy = 3;
 		panel.add(score, gbc);
-
-		gbc.gridx = 0;
-		gbc.gridy = 4;
-		panel.add(time, gbc);
 
 		easy.addActionListener(new easyMode());
 		normal.addActionListener(new normalMode());
@@ -118,6 +118,7 @@ public class Board {
 	    result.remove(cells[x][y]);
 	    return result;
 	}
+
 	private void setCellValues() {
 		for(int i = 0; i < side; i++){
 	    	for(int j = 0; j < side; j++){
@@ -136,6 +137,7 @@ public class Board {
 	    	}
 	    }
 	}
+
 	private void scanForEmptyCells(Cell cell){
 		int x = cell.getI();
 		int y = cell.getJ();
@@ -154,14 +156,29 @@ public class Board {
 			}
 		}
 	}
+
+	public void gameOver(){
+		this.revealBoard();
+	}
+
+	public void revealBoard(){
+		for(int i = 0; i < side ; i++){
+			for(int j = 0; j < side; j++){
+				if(cells[i][j].isChecked() != true){
+					cells[i][j].reveal();
+				}
+			}
+		}
+	}
+
 	private class mouseClicking implements MouseListener{
 		boolean pressed;
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			System.out.println("Cristian");
-			//if(){
-
-			//}
+			if(timer1 == 0){
+				timer.start();
+				timer1 = 1;
+			}
 		}
 
 		@Override
@@ -192,6 +209,8 @@ public class Board {
 				if (SwingUtilities.isRightMouseButton(e)) {
 					if(temp.isFlagged() == false){
 						temp.setText("F");
+						timer.stop();
+						System.out.println(timer.getElapsedTimeSecs());
 						temp.setFlag(true);
 					}
 					else if(temp.isFlagged() == true){
@@ -223,33 +242,42 @@ public class Board {
 		}
 
 	}
+
 	private class easyMode implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			frame.remove(menu);
-			SwingUtilities.updateComponentTreeUI(frame);
+
 			numMines = 9;
-			side = 10;
-			frame.add(addCells(10), BorderLayout.CENTER);
-			JButton test = new JButton();
-			test.setText("Cristain loves loli");
-			frame.add(test, BorderLayout.NORTH);
+			side     = 10;
+			game     = addCells(10);
+
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.fill               = GridBagConstraints.HORIZONTAL;
+			menubar 							 = new JPanel();
+
+			menubar.setLayout(new GridBagLayout());
+
+			gbc.gridx = 0;
+			gbc.gridy = 0;
+			menubar.add(menubutton, gbc);
+
+			gbc.gridx = 1;
+			gbc.gridy = 0;
+			menubar.add(reset, gbc);
+
+
+			frame.add(game, BorderLayout.CENTER);
+			frame.add(menubar, BorderLayout.NORTH);
+			menubutton.addActionListener(new goBack());
+			reset.addActionListener(new gameEasyReset());
+			frame.setSize(800,800);
+			SwingUtilities.updateComponentTreeUI(frame);
 		}
 
 	}
-	public void gameOver(){
-		this.revealBoard();
-	}
-	public void revealBoard(){
-		for(int i = 0; i < side ; i++){
-			for(int j = 0; j < side; j++){
-				if(cells[i][j].isChecked() != true){
-					cells[i][j].reveal();
-				}
-			}
-		}
-	}
+
 	private class normalMode implements ActionListener{
 
 		@Override
@@ -257,7 +285,29 @@ public class Board {
 			frame.remove(menu);
 			numMines = 50;
 			side = 15;
-			frame.add(addCells(15));
+			game = addCells(15);
+
+
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.fill               = GridBagConstraints.HORIZONTAL;
+			menubar 							 = new JPanel();
+
+			menubar.setLayout(new GridBagLayout());
+
+			gbc.gridx = 0;
+			gbc.gridy = 0;
+			menubar.add(menubutton, gbc);
+
+			gbc.gridx = 1;
+			gbc.gridy = 0;
+			menubar.add(reset, gbc);
+
+
+			frame.add(game, BorderLayout.CENTER);
+			frame.add(menubar, BorderLayout.NORTH);
+			menubutton.addActionListener(new goBack());
+			reset.addActionListener(new gameMediumReset());
+			frame.setSize(1200,800);
 			SwingUtilities.updateComponentTreeUI(frame);
 		}
 
@@ -269,8 +319,28 @@ public class Board {
 			frame.remove(menu);
 			numMines = 100;
 			side = 20;
-			frame.add(addCells(20));
-			frame.setSize(800,800);
+			game = addCells(20);
+
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.fill               = GridBagConstraints.HORIZONTAL;
+			menubar 							 = new JPanel();
+
+			menubar.setLayout(new GridBagLayout());
+
+			gbc.gridx = 0;
+			gbc.gridy = 0;
+			menubar.add(menubutton, gbc);
+
+			gbc.gridx = 1;
+			gbc.gridy = 0;
+			menubar.add(reset, gbc);
+
+
+			frame.add(game, BorderLayout.CENTER);
+			frame.add(menubar, BorderLayout.NORTH);
+			menubutton.addActionListener(new goBack());
+			reset.addActionListener(new gameHardReset());
+			frame.setSize(1400,800);
 			SwingUtilities.updateComponentTreeUI(frame);
 		}
 
@@ -281,16 +351,76 @@ public class Board {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			frame.remove(menu);
-			numMines = 100;
-			side = 20;
-			frame.add(addCells(20));
-			frame.setSize(800,800);
 			SwingUtilities.updateComponentTreeUI(frame);
 		}
 
 	}
 
+	private class goBack implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			frame.remove(game);
+			frame.remove(menubar);
+			frame.add(menu);
+			frame.setSize(200,200);
+			timer1 = 0;
+			SwingUtilities.updateComponentTreeUI(frame);
+		}
+
+	}
+
+	private class gameEasyReset implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+
+			frame.remove(game);
+			numMines = 9;
+			side = 10;
+			game = addCells(10);
+			frame.add(game);
+			timer1 = 0;
+			SwingUtilities.updateComponentTreeUI(frame);
+
+		}
+	}
+
+	private class gameMediumReset implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+
+			frame.remove(game);
+			numMines = 50;
+			side = 15;
+			game = addCells(15);
+			frame.add(game);
+			timer1 = 0;
+			SwingUtilities.updateComponentTreeUI(frame);
+
+		}
+	}
+
+	private class gameHardReset implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+
+			frame.remove(game);
+			numMines = 100;
+			side = 20;
+			game = addCells(20);
+			frame.add(game);
+			timer1 = 0;
+			SwingUtilities.updateComponentTreeUI(frame);
+
+		}
+	}
+
 	public void win(){
 		this.revealBoard();
 	}
+
+	StopWatch timer = new StopWatch();
 }
