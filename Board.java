@@ -19,6 +19,10 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import java.awt.TextField;
+import java.io.*;
+import java.awt.*;
+import javax.swing.*;
 
 
 public class Board {
@@ -34,7 +38,9 @@ public class Board {
 	private int nonMines;
 	private JButton menubutton = new JButton("Menu");
 	private JButton reset = new JButton("Reset");
+	StopWatch timer = new StopWatch();
 	private int timer1 = 0;
+	private JTextField input;
 
 
 	Board(){
@@ -44,6 +50,11 @@ public class Board {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		menu = Menu();
 		frame.add(menu, BorderLayout.CENTER);
+		try{
+			saveFile();
+		} catch(Exception e){
+
+		}
 		frame.setVisible(true);
 	}
 
@@ -83,6 +94,20 @@ public class Board {
 		score.addActionListener(new scoreBoard());
 		return panel;
 	}
+
+	//private JPanel highScore(){
+
+	//}
+
+	private void saveFile() throws java.io.IOException{
+		try{
+			FileWriter fr = new FileWriter("highscore.txt", true);
+			fr.write("test");
+		}catch(FileNotFoundException e){
+
+		}
+	}
+
 	public JPanel addCells(int side){
 		JPanel panel = new JPanel(new GridLayout(side,side));
 		cells = new Cell[side][side];
@@ -99,6 +124,7 @@ public class Board {
 		nonMines = side*side - numMines;
 		return panel;
 	}
+
 	public void plantMines(int sides){
 		Random random = new Random();
 		int counter = 0;
@@ -106,10 +132,12 @@ public class Board {
 			counter += cells[random.nextInt(sides)][random.nextInt(sides)].setMine();
 		}
 	}
+
 	private IntStream sidesOf(int value) {
 	    return IntStream.rangeClosed(value - 1, value + 1).filter(
 	            x -> x >= 0 && x < side);
 	}
+
 	private Set<Cell> getSurroundingCells(int x, int y) {
 	    Set<Cell> result = new HashSet<>();
 	    sidesOf(x).forEach(a -> {
@@ -422,5 +450,4 @@ public class Board {
 		this.revealBoard();
 	}
 
-	StopWatch timer = new StopWatch();
 }
