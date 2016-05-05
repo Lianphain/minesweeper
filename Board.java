@@ -19,10 +19,9 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import java.awt.TextField;
-import java.io.*;
 import java.awt.*;
 import javax.swing.*;
+import java.awt.event.*;
 
 
 public class Board {
@@ -38,9 +37,8 @@ public class Board {
 	private int nonMines;
 	private JButton menubutton = new JButton("Menu");
 	private JButton reset = new JButton("Reset");
-	StopWatch timer = new StopWatch();
 	private int timer1 = 0;
-	private JTextField input;
+	StopWatch timer = new StopWatch();
 
 
 	Board(){
@@ -50,11 +48,6 @@ public class Board {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		menu = Menu();
 		frame.add(menu, BorderLayout.CENTER);
-		try{
-			saveFile();
-		} catch(Exception e){
-
-		}
 		frame.setVisible(true);
 	}
 
@@ -93,19 +86,6 @@ public class Board {
 		hard.addActionListener(new hardMode());
 		score.addActionListener(new scoreBoard());
 		return panel;
-	}
-
-	//private JPanel highScore(){
-
-	//}
-
-	private void saveFile() throws java.io.IOException{
-		try{
-			FileWriter fr = new FileWriter("highscore.txt", true);
-			fr.write("test");
-		}catch(FileNotFoundException e){
-
-		}
 	}
 
 	public JPanel addCells(int side){
@@ -174,19 +154,46 @@ public class Board {
 		while(iter.hasNext()){
 			Cell temp = iter.next();
 			if(temp.isEmpty() == true && temp.isChecked() == false){
-				temp.reveal();
-				nonMines--;
+				nonMines -= temp.reveal();
+				if(nonMines ==0){
+					win();
+				}
 				scanForEmptyCells(temp);
+
 			}
 			else{
-				temp.reveal();
-				nonMines--;
+				nonMines -= temp.reveal();
+				if(nonMines == 0){
+					win();
+				}
 			}
 		}
 	}
 
+	private void saveFile(String text){
+	  try{
+	    FileWriter fr = new FileWriter("highscore.txt", true);
+	    fr.write(text + "\n");
+	    System.out.println("It did work");
+	    fr.flush();
+	    fr.close();
+	  }catch(FileNotFoundException e){
+	    System.out.println("Didn't work");
+	  }
+	}
+
 	public void gameOver(){
 		this.revealBoard();
+		JFrame lose = new JFrame("You lose!");
+		JLabel loser = new JLabel("You lose!");
+		lose.setLayout(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		lose.add(loser, gbc);
+		lose.setSize(500,500);
+		lose.setVisible(true);
 	}
 
 	public void revealBoard(){
@@ -194,6 +201,21 @@ public class Board {
 			for(int j = 0; j < side; j++){
 				if(cells[i][j].isChecked() != true){
 					cells[i][j].reveal();
+				}
+			}
+		}
+	}
+
+	private void flagMines(){
+		for(int i = 0; i < side ; i++){
+			for(int j = 0; j < side; j++){
+				if(cells[i][j].isChecked() != true && cells[i][j].isFlagged() == false){
+					cells[i][j].setText("F");
+					cells[i][j].setEnabled(false);
+
+				}
+				else{
+					cells[i][j].setEnabled(false);
 				}
 			}
 		}
@@ -252,14 +274,14 @@ public class Board {
 						gameOver();
 					}
 					else if(temp.isEmpty() == true && temp.isFlagged() == false){
+						nonMines -= temp.reveal();
 						scanForEmptyCells(temp);
 						if(nonMines == 0){
 							win();
 						}
 					}
 					else if(temp.isFlagged() == false){
-						temp.reveal();
-						nonMines--;
+						nonMines -= temp.reveal();
 						if(nonMines == 0){
 							win();
 						}
@@ -340,6 +362,7 @@ public class Board {
 		}
 
 	}
+
 	private class hardMode implements ActionListener{
 
 		@Override
@@ -447,7 +470,17 @@ public class Board {
 	}
 
 	public void win(){
-		this.revealBoard();
+		flagMines();
+		JFrame win = new JFrame("You win!");
+		JLabel winner = new JLabel("You win!");
+		win.setLayout(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		win.add(winner, gbc);
+		win.setSize(500,500);
+		win.setVisible(true);
 	}
 
 }

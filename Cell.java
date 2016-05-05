@@ -51,17 +51,20 @@ public class Cell extends JButton {
 	public int getJ(){
 		return j;
 	}
-	public void reveal(){
+	public int reveal(){
+		int bul = 0;
 		if(mine == true){
 			this.setText("Mine");
 			check = true;
 			this.setEnabled(false);
 		}
-		else{
+		else if(check == false){
 			this.setText(String.valueOf(data));
 			check = true;
 			this.setEnabled(false);
+			return bul = 1;
 		}
+		return bul;
 	}
 	public boolean isEmpty(){
 		return data == 0;
